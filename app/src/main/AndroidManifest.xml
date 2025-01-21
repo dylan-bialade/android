@@ -22,6 +22,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Déclarez RGPDActivity ici -->
+        <activity android:name=".RGPDActivity" />
+        <activity android:name=".SignatureActivity" />
+
     </application>
 
 </manifest>

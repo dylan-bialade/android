@@ -9,29 +9,57 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import android.content.Intent;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
 import com.example.android.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
+    private EditText etNom, etPrenom, etEmail, etEmailConfirm;
+    private Button btnSuivant;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        etNom = findViewById(R.id.etNom);
+        etPrenom = findViewById(R.id.etPrenom);
+        etEmail = findViewById(R.id.etEmail);
+        etEmailConfirm = findViewById(R.id.etEmailConfirm);
+        btnSuivant = findViewById(R.id.btnSuivant);
 
-        BottomNavigationView navView = findViewById(R.id.nav_view);
-        // Passing each menu ID as a set of Ids because each
-        // menu should be considered as top level destinations.
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications)
-                .build();
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
-        NavigationUI.setupWithNavController(binding.navView, navController);
+        btnSuivant.setOnClickListener(v -> {
+            if (validerEmails()) {
+                Intent intent = new Intent(MainActivity.this, RGPDActivity.class);
+                intent.putExtra("nom", etNom.getText().toString());
+                intent.putExtra("prenom", etPrenom.getText().toString());
+                intent.putExtra("email", etEmail.getText().toString());
+                startActivity(intent);
+            }
+        });
     }
 
+    private boolean validerEmails() {
+        String email = etEmail.getText().toString();
+        String emailConfirm = etEmailConfirm.getText().toString();
+
+        if (email.isEmpty() || emailConfirm.isEmpty()) {
+            Toast.makeText(this, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (!email.equals(emailConfirm)) {
+            Toast.makeText(this, "Les adresses e-mail ne correspondent pas", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return true;
+    }
 }
