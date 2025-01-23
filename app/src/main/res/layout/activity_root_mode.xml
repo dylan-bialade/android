@@ -24,16 +24,10 @@
         android:layout_marginTop="?attr/actionBarSize"
         app:layout_constraintTop_toBottomOf="@id/toolbar">
 
-        <com.example.android.signature.SignatureView
-            android:id="@+id/signatureView"
-            android:layout_width="match_parent"
-            android:layout_height="400dp"
-            android:background="#eeeeee" />
-
         <Button
-            android:id="@+id/btnEnregistrer"
+            android:id="@+id/btnResetCredentials"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Enregistrer" />
+            android:text="Réinitialiser les identifiants" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -23,15 +23,34 @@
         android:padding="16dp"
         android:layout_marginTop="?attr/actionBarSize"
         app:layout_constraintTop_toBottomOf="@id/toolbar">
-
-        <com.example.android.signature.SignatureView
-            android:id="@+id/signatureView"
+        <EditText
+            android:id="@+id/etIpAddress"
             android:layout_width="match_parent"
-            android:layout_height="400dp"
-            android:background="#eeeeee" />
+            android:layout_height="wrap_content"
+            android:hint="Adresse IP" />
+
+        <EditText
+            android:id="@+id/etPort"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Port"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/etWebServiceUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Nom d'utilisateur Web Service" />
+
+        <EditText
+            android:id="@+id/etWebServicePassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Mot de passe Web Service"
+            android:inputType="textPassword" />
 
         <Button
-            android:id="@+id/btnEnregistrer"
+            android:id="@+id/btnSaveConfig"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Enregistrer" />

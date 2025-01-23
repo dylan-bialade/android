@@ -14,6 +14,12 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        packaging {
+            resources {
+                excludes += "META-INF/DEPENDENCIES"
+            }
+        }
     }
 
     buildTypes {
@@ -35,7 +41,7 @@ android {
 }
 
 dependencies {
-
+    // Core dependencies
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
@@ -43,7 +49,31 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
+
+    // Apache XML-RPC for client-server communication
+    implementation("org.apache.xmlrpc:xmlrpc-client:3.1.3")
+
+    // Unit testing dependencies
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.mockito:mockito-core:4.11.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:4.11.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.9.2")
+
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+
+    // Android instrumented testing dependencies
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    // Explicit exclusion to avoid version conflicts
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "junit" && requested.name == "junit") {
+                useVersion("4.13.2")
+            }
+        }
+    }
+
 }

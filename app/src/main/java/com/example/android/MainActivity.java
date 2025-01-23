@@ -1,23 +1,24 @@
 package com.example.android;
 
-import android.os.Bundle;
-
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import com.example.android.databinding.ActivityMainBinding;
+import androidx.appcompat.widget.Toolbar;
 
+import com.example.android.databinding.ActivityMainBinding;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
@@ -29,12 +30,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Initialisation des vues
         etNom = findViewById(R.id.etNom);
         etPrenom = findViewById(R.id.etPrenom);
         etEmail = findViewById(R.id.etEmail);
         etEmailConfirm = findViewById(R.id.etEmailConfirm);
         btnSuivant = findViewById(R.id.btnSuivant);
 
+        // Configuration de la Toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // Bouton suivant : validation et redirection
         btnSuivant.setOnClickListener(v -> {
             if (validerEmails()) {
                 Intent intent = new Intent(MainActivity.this, RGPDActivity.class);
@@ -46,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // Validation des champs email
     private boolean validerEmails() {
         String email = etEmail.getText().toString();
         String emailConfirm = etEmailConfirm.getText().toString();
@@ -61,5 +69,34 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    // Chargement du menu
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.toolbar_menu, menu); // Remplacez par toolbar_menu
+        return true;
+    }
+
+    // Gestion des clics sur les éléments du menu
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId(); // Récupère l'ID du menu sélectionné
+
+        if (id == R.id.action_settings) {
+            // Ouvrir ConfigActivity
+            startActivity(new Intent(this, ConfigActivity.class));
+            return true;
+        } else if (id == R.id.action_home) {
+            // Retour à MainActivity
+            startActivity(new Intent(this, MainActivity.class));
+            return true;
+        } else if (id == android.R.id.home) {
+            // Bouton retour
+            onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
