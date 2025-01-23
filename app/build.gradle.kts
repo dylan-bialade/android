@@ -52,6 +52,8 @@ dependencies {
 
     // Apache XML-RPC for client-server communication
     implementation("org.apache.xmlrpc:xmlrpc-client:3.1.3")
+    implementation(libs.volley)
+
 
     // Unit testing dependencies
     testImplementation("junit:junit:4.13.2")
