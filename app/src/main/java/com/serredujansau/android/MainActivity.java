@@ -1,4 +1,4 @@
-package com.example.android;
+package com.serredujansau.android;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,13 +12,9 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.example.android.databinding.ActivityMainBinding;
-import android.content.Intent;
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
+import com.serredujansau.android.databinding.ActivityMainBinding;
+import com.serredujansau.android.R;
+
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;

@@ -1,4 +1,4 @@
-package com.example.android;
+package com.serredujansau.android;
 
 import android.Manifest;
 import android.content.pm.PackageManager;

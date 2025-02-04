@@ -1,4 +1,4 @@
-package com.example.android;
+package com.serredujansau.android;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,7 +17,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.android.signature.SignatureView;
+import com.serredujansau.android.signature.SignatureView;
 
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;

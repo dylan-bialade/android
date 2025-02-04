@@ -1,4 +1,4 @@
-package com.example.android;
+package com.serredujansau.android;
 
 import android.content.Intent;
 import android.os.Bundle;

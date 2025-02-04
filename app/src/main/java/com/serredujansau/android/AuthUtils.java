@@ -1,4 +1,4 @@
-package com.example.android;
+package com.serredujansau.android;
 
 import android.content.Context;
 import android.content.SharedPreferences;

@@ -1,4 +1,4 @@
-package com.example.android;
+package com.serredujansau.android;
 
 import static org.junit.Assert.assertEquals;
 

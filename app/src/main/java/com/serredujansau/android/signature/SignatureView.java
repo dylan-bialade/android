@@ -1,4 +1,4 @@
-package com.example.android.signature;
+package com.serredujansau.android.signature;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
