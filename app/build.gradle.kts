@@ -56,6 +56,11 @@ dependencies {
     implementation(libs.volley)
 
 
+        implementation("androidx.appcompat:appcompat:1.4.1")
+        implementation ("com.google.android.material:material:1.6.0")// Pour `TextInputLayout`
+        implementation ("androidx.constraintlayout:constraintlayout:2.1.4")// Pour `ConstraintLayout`
+
+
     // Unit testing dependencies
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito:mockito-core:4.11.0")

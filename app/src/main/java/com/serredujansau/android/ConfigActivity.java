@@ -1,29 +1,31 @@
 package com.serredujansau.android;
 
-import android.Manifest;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import org.apache.xmlrpc.client.XmlRpcClient;
-import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
+import android.content.Intent;
+import android.view.Menu;
+import android.view.MenuItem;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 import java.io.File;
 import java.io.FileOutputStream;
-import java.net.URL;
-import java.util.Vector;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ConfigActivity extends AppCompatActivity {
-    private static final int REQUEST_PERMISSIONS = 1;
-    private EditText etIpAddress, etPort, etUsername, etPassword;
+    private EditText etIpAddress, etPort, etWebServiceUsername, etWebServicePassword;
     private Button btnSaveConfig;
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,115 +34,94 @@ public class ConfigActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        // Vérifier et demander les permissions
-        checkAndRequestPermissions();
-
         etIpAddress = findViewById(R.id.etIpAddress);
         etPort = findViewById(R.id.etPort);
-        etUsername = findViewById(R.id.etWebServiceUsername);
-        etPassword = findViewById(R.id.etWebServicePassword);
+        etWebServiceUsername = findViewById(R.id.etWebServiceUsername);
+        etWebServicePassword = findViewById(R.id.etWebServicePassword);
         btnSaveConfig = findViewById(R.id.btnSaveConfig);
+        prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
 
-        SharedPreferences prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        // Charger les paramètres existants
         etIpAddress.setText(prefs.getString("IP_ADDRESS", ""));
         etPort.setText(prefs.getString("PORT", ""));
-        etUsername.setText(prefs.getString("WS_USERNAME", ""));
-        etPassword.setText(prefs.getString("WS_PASSWORD", ""));
+        etWebServiceUsername.setText(prefs.getString("WS_USERNAME", ""));
+        etWebServicePassword.setText(prefs.getString("WS_PASSWORD", ""));
 
         btnSaveConfig.setOnClickListener(v -> {
             String ipAddress = etIpAddress.getText().toString().trim();
             String port = etPort.getText().toString().trim();
-            String username = etUsername.getText().toString().trim();
-            String password = etPassword.getText().toString().trim();
+            String wsUsername = etWebServiceUsername.getText().toString().trim();
+            String wsPassword = etWebServicePassword.getText().toString().trim();
 
-            if (ipAddress.isEmpty() || port.isEmpty() || username.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "⚠️ Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show();
+            if (ipAddress.isEmpty() || port.isEmpty() || wsUsername.isEmpty() || wsPassword.isEmpty()) {
+                Toast.makeText(this, "Veuillez remplir tous les champs", Toast.LENGTH_SHORT).show();
                 return;
             }
 
+            // Désactiver le bouton pour éviter plusieurs clics
             btnSaveConfig.setEnabled(false);
 
-            new Thread(() -> {
-                boolean success = testConnection(ipAddress, port, username, password);
-                runOnUiThread(() -> {
-                    if (success) {
-                        SharedPreferences.Editor editor = prefs.edit();
-                        editor.putString("IP_ADDRESS", ipAddress);
-                        editor.putString("PORT", port);
-                        editor.putString("WS_USERNAME", username);
-                        editor.putString("WS_PASSWORD", password);
-                        editor.apply();
-
-                        createLoginFile(username, password);
-                        Toast.makeText(this, "✅ Configuration enregistrée", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, "❌ Échec de connexion au serveur", Toast.LENGTH_SHORT).show();
-                    }
-                    btnSaveConfig.setEnabled(true);
-                });
-            }).start();
+            // Tester la connexion avec le serveur
+            testConnection(ipAddress, port, wsUsername, wsPassword);
         });
     }
 
-    // Vérifier et demander les permissions nécessaires
-    private void checkAndRequestPermissions() {
-        String[] permissions = {
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.INTERNET
+    private void testConnection(String ipAddress, String port, String username, String password) {
+        String serverUrl = "http://" + ipAddress + ":" + port + "/";
+
+        RequestQueue queue = Volley.newRequestQueue(this);
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, serverUrl,
+                response -> {
+                    // ✅ Si la connexion réussit, enregistrer les paramètres
+                    saveConfig(ipAddress, port, username, password);
+                },
+                error -> {
+                    // ❌ Si la connexion échoue, afficher un message d'erreur
+                    Toast.makeText(this, "⚠️ Échec de connexion au serveur. Vérifiez vos paramètres.", Toast.LENGTH_LONG).show();
+                    btnSaveConfig.setEnabled(true);
+                }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
+                params.put("method", "mg.version");
+                params.put("username", username);
+                params.put("password", password);
+                params.put("check", "1"); // Peut être modifié selon les besoins du WebService
+                return params;
+            }
         };
 
-        boolean allGranted = true;
-        for (String permission : permissions) {
-            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                allGranted = false;
-                break;
-            }
-        }
-
-        if (!allGranted) {
-            ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSIONS);
-        }
+        queue.add(stringRequest);
     }
 
-    // Vérifier la connexion au serveur XML-RPC
-    private boolean testConnection(String ipAddress, String port, String username, String password) {
-        try {
-            XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
-            config.setServerURL(new URL("http://" + ipAddress + ":" + port + "/"));
-            config.setBasicUserName(username);
-            config.setBasicPassword(password);
+    private void saveConfig(String ipAddress, String port, String username, String password) {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("IP_ADDRESS", ipAddress);
+        editor.putString("PORT", port);
+        editor.putString("WS_USERNAME", username);
+        editor.putString("WS_PASSWORD", password);
+        editor.apply();
 
-            XmlRpcClient client = new XmlRpcClient();
-            client.setConfig(config);
+        // Création du fichier LoginWebS.txt
+        createLoginWebFile(username, password);
 
-            Vector<Object> params = new Vector<>();
-            params.add(username);
-            params.add(password);
-
-            Object result = client.execute("client.read", params);
-
-            return result != null;
-        } catch (Exception e) {
-            return false;
-        }
+        Toast.makeText(this, "✅ Configuration enregistrée avec succès", Toast.LENGTH_SHORT).show();
+        btnSaveConfig.setEnabled(true);
     }
 
-    // Créer le fichier `LoginWebS.txt`
-    private void createLoginFile(String username, String password) {
-        try {
-            File file = new File(getFilesDir(), "LoginWebS.txt");
-            FileOutputStream fos = new FileOutputStream(file);
-            String content = "Username=" + username + "\nPassword=" + password;
+    private void createLoginWebFile(String username, String password) {
+        File file = new File(getFilesDir(), "LoginWebS.txt");
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            String content = username + "\n" + password;
             fos.write(content.getBytes());
-            fos.close();
-            Toast.makeText(this, "✅ Fichier LoginWebS.txt créé", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            Toast.makeText(this, "❌ Erreur lors de la création du fichier", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "📂 Fichier LoginWebS.txt créé", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            Toast.makeText(this, "⚠️ Erreur lors de la création du fichier", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -148,31 +129,22 @@ public class ConfigActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == android.R.id.home) {
-            finish();
+        if (id == R.id.action_settings) {
+            startActivity(new Intent(this, ConfigActivity.class));
+            return true;
+        } else if (id == R.id.action_home) {
+            startActivity(new Intent(this, MainActivity.class));
+            return true;
+        } else if (id == android.R.id.home) {
+            onBackPressed();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == REQUEST_PERMISSIONS) {
-            boolean allGranted = true;
-            for (int result : grantResults) {
-                if (result != PackageManager.PERMISSION_GRANTED) {
-                    allGranted = false;
-                    break;
-                }
-            }
-
-            if (!allGranted) {
-                Toast.makeText(this, "⚠️ Permissions refusées", Toast.LENGTH_LONG).show();
-            } else {
-                Toast.makeText(this, "✅ Permissions accordées", Toast.LENGTH_SHORT).show();
-            }
-        }
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+        return true;
     }
 }
